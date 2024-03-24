@@ -5,6 +5,9 @@
 #include <Adafruit_ADXL345_U.h>
 #include <cmath>
 
+#include <WiFi.h>
+#include <WebServer.h>
+
 #define DATA_PIN 14
 #define CLOCK_PIN 27
 
@@ -52,6 +55,19 @@ CRGB currentColor;
 bool useAccel = false;
 
 Adafruit_ADXL345_Unified accel = Adafruit_ADXL345_Unified(12345);
+
+#include "network.h";
+WebServer server(80);
+#include "html.h";
+void MainPage() {
+    String _html_page = html_page;
+    server.send(200, "text/html", _html_page);
+}
+
+void JerkPage() {
+    String data = "[\"" + String(X) + "\",\"" + String(Y) + "\",\"" + String(Z) + "\"]";
+    server.send(200, "text/plane", data);
+}
 
 unsigned long _time;
 unsigned long elapsedMs;
@@ -185,6 +201,34 @@ void initGravity() {
 
 void readSensor(unsigned long elapsedMs);
 
+void setupServer() {
+    server.on('/', MainPage);
+    server.on('/jerk', JerkPage);
+    server.begin();
+}
+
+bool setupWiFiConnection() {
+    // lelel, cf. https://www.electronicwings.com/esp32/adxl345-accelerometer-interfacing-with-esp32
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(WIFI_SSID, WIFI_PW);
+
+    Serial.print("Connecting to ");
+    Serial.println(WIFI_SSID);
+    delay(1000);
+
+    int abort_after_attempts = 50;
+    while (abort_after_attempts-- > 0) {
+        if (WiFi.waitForConnectResult() == WL_CONNECTED) {
+            Serial.print("IP: ");
+            Serial.println(WiFi.localIP());
+            return true;
+        }
+        Serial.println(".");
+    }
+    Serial.println("Timeout");
+    return false;
+}
+
 void setup() {
     FastLED.addLeds<SK9822, DATA_PIN, CLOCK_PIN, BGR>(leds, N_LEDS);
     FastLED.setBrightness(MAX_BRIGHTNESS);
@@ -198,9 +242,12 @@ void setup() {
     _time = micros();
 
     currentHue = startHue;
+
+    setupServer();
+    setupWiFiConnection();
 }
 
-void handleInput() {
+void handleSerialInput() {
     if (!Serial.available()) {
         return;
     }
@@ -221,7 +268,9 @@ void loop() {
     auto now = micros();
     elapsedMs = (now - _time) / 1000;
 
-    handleInput();
+    server.handleClient();
+
+    handleSerialInput();
 
     readSensor(elapsedMs);
 
