@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"name": "Try ADXL345",
+			"path": "../Try ADXL345"
+		}
+	],
+    "settings": {
+        "files.associations": {
+            "functional": "cpp"
+        }
+    }
+}
