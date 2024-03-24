@@ -5,8 +5,9 @@
 #include <Adafruit_ADXL345_U.h>
 #include <cmath>
 
-#include <WiFi.h>
-#include <WebServer.h>
+// TODO: try that with the Web Server some other time.
+// #include <WiFi.h>
+// #include <WebServer.h>
 
 #define DATA_PIN 14
 #define CLOCK_PIN 27
@@ -56,6 +57,7 @@ bool useAccel = false;
 
 Adafruit_ADXL345_Unified accel = Adafruit_ADXL345_Unified(12345);
 
+/*
 #include "network.h";
 WebServer server(80);
 #include "html.h";
@@ -68,6 +70,7 @@ void JerkPage() {
     String data = "[\"" + String(X) + "\",\"" + String(Y) + "\",\"" + String(Z) + "\"]";
     server.send(200, "text/plane", data);
 }
+*/
 
 unsigned long _time;
 unsigned long elapsedMs;
@@ -201,6 +204,7 @@ void initGravity() {
 
 void readSensor(unsigned long elapsedMs);
 
+/*
 void setupServer() {
     server.on('/', MainPage);
     server.on('/jerk', JerkPage);
@@ -210,6 +214,7 @@ void setupServer() {
 bool setupWiFiConnection() {
     // lelel, cf. https://www.electronicwings.com/esp32/adxl345-accelerometer-interfacing-with-esp32
     WiFi.mode(WIFI_STA);
+    // WIFI_SSID, WIFI_PW not defined here, do that in a file that is not commited to the repo ;)
     WiFi.begin(WIFI_SSID, WIFI_PW);
 
     Serial.print("Connecting to ");
@@ -228,6 +233,7 @@ bool setupWiFiConnection() {
     Serial.println("Timeout");
     return false;
 }
+*/
 
 void setup() {
     FastLED.addLeds<SK9822, DATA_PIN, CLOCK_PIN, BGR>(leds, N_LEDS);
@@ -243,8 +249,8 @@ void setup() {
 
     currentHue = startHue;
 
-    setupServer();
-    setupWiFiConnection();
+    // setupServer();
+    // setupWiFiConnection();
 }
 
 void handleSerialInput() {
@@ -268,7 +274,8 @@ void loop() {
     auto now = micros();
     elapsedMs = (now - _time) / 1000;
 
-    server.handleClient();
+    // ... but not today!
+    // server.handleClient();
 
     handleSerialInput();
 
