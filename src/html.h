@@ -37,13 +37,3 @@ const char html_page[] PROGMEM = R"RawString(
 </body>
 </html>
 )RawString";
-
-void MainPage() {
-    String _html_page = html_page;
-    server.send(200, "text/html", _html_page);
-}
-
-void JerkPage() {
-    String data = "[\"" + String(X) + "\",\"" + String(Y) + "\",\"" + String(Z) + "\"]";
-    server.send(200, "text/plane", data);
-}
